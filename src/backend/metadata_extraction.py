@@ -20,7 +20,6 @@ def extract_metadata(root_path: str, directories: list, output_files: list):
     for i, directory in enumerate(directories):
         print(f"Processing directory {directory}...")
         images_path = os.path.join(root_path, directory)
-        path = images_path.replace('../', '')
 
         # create output CSV file and write header row
         output_file = output_files[i]
@@ -49,8 +48,11 @@ def extract_metadata(root_path: str, directories: list, output_files: list):
                         # get label
                         label = directory
 
+                        # clean file path
+                        file_path = file_path.replace("../", "")
+
                         # write to csv the metadata generated
-                        writer.writerow([filename, path, bytes_size, resolution, aspect_ratio, label])
+                        writer.writerow([filename, file_path, bytes_size, resolution, aspect_ratio, label])
 
 
 if __name__ == '__main__':
