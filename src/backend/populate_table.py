@@ -32,6 +32,7 @@ table_schema = '''
     bytes_size INTEGER,
     resolution TEXT,
     aspect_ratio REAL,
+    type TEXT,
     label TEXT
 '''
 
@@ -45,7 +46,7 @@ c.execute(check_table_query)
 table_exists = c.fetchone()
 
 # Create or update table
-if table_exists:
+if table_exists[0] == 1:
     # Clear existing table contents
     clear_table_query = '''
         DELETE FROM metadata
@@ -62,7 +63,7 @@ else:
     conn.commit()
 
 # Insert read rows into database
-insert_query = 'INSERT INTO metadata VALUES (?, ?, ?, ?, ?, ?, ?)'
+insert_query = 'INSERT INTO metadata VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
 c.executemany(insert_query, rows)
 
 conn.commit()

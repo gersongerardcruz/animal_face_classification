@@ -25,7 +25,7 @@ def extract_metadata(root_path: str, directories: list, output_files: list):
         output_file = output_files[i]
         with open(output_file, mode='w', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow(['filename', 'file_path', 'bytes_size', 'resolution', 'aspect_ratio', 'label'])
+            writer.writerow(['filename', 'file_path', 'bytes_size', 'resolution', 'aspect_ratio', 'type', 'label'])
 
             # loop through each image in directory and extract metadata
             for subdir, _, files in os.walk(images_path):
@@ -45,14 +45,20 @@ def extract_metadata(root_path: str, directories: list, output_files: list):
                         resolution = f"{img.shape[1]}x{img.shape[0]}"
                         aspect_ratio = round(img.shape[1] / img.shape[0], 2)
 
-                        # get label
-                        label = directory
+                        # get dataset type
+                        type = directory
 
-                        # clean file path
-                        file_path = file_path.replace("../", "")
+                        # Get the label based on the folder directory
+                        label = 'unknown'
+                        if 'dog' in subdir:
+                            label = 'dog'
+                        elif 'cat' in subdir:
+                            label = 'cat'
+                        elif 'wild' in subdir:
+                            label = 'wildlife'                        
 
                         # write to csv the metadata generated
-                        writer.writerow([filename, file_path, bytes_size, resolution, aspect_ratio, label])
+                        writer.writerow([filename, file_path, bytes_size, resolution, aspect_ratio, type, label])
 
 
 if __name__ == '__main__':
