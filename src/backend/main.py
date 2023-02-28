@@ -57,11 +57,11 @@ def predict_image_class(model, img, threshold=0.6):
     if preds_proba[top_class_idx] > threshold:
         # Return predicted class name
         if top_class_idx == 0:
-            return "That image is a cat"
+            return "cat"
         elif top_class_idx == 1:
-            return "That image is a dog"
+            return "dog"
         else:
-            return "That image is an animal from wildlife"
+            return "wildlife"
     else:
         return "I am not certain about that image, can you provide a better one?"
 

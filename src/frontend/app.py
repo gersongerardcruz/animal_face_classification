@@ -63,7 +63,7 @@ def app():
             predictions = get_predictions(image_bytes)
 
         # Display the prediction results
-        st.write('Prediction:', predictions)
+        st.subheader('That animal is a ', predictions["response"])
 
     # If predictions have been made, display a download button for the predictions
     if predictions is not None:
