@@ -130,7 +130,7 @@ def train():
         tuner.search(
             train,
             validation_data=val,
-            epochs=args.epochs
+            epochs=args.tuner_epochs
         )
 
         # Print the best hyperparameters
@@ -161,6 +161,7 @@ if __name__ == "__main__":
     parser.add_argument("--db_path", type=str, help="Path to database to collect train and val data")
     parser.add_argument("--max_trials", type=int, help="Number of trials to tune with keras-tuner", default=5)
     parser.add_argument("--executions_per_trial", type=int, help="Number of executions per trial", default=3)
+    parser.add_argument("--tuner_epochs", type=int, help="Number of trials to tune with keras-tuner", default=10)
     args = parser.parse_args()
 
     train()
