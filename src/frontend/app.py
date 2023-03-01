@@ -1,95 +1,130 @@
 import argparse
 import streamlit as st
 import requests
-import pandas as pd
-import json
 import sqlite3
 from PIL import Image
+      
+# Define function to make API request and return predictions
+def get_predictions(file_bytes):
 
-button1 = st.button('Check 1')
+    # Define the FastAPI endpoint URL
+    api_url = args.endpoint
 
-if st.session_state.get('button') != True:
+    # Make API request
+    response = requests.post(api_url, files={'file': file_bytes})
 
-    st.session_state['button'] = button1
+    # Check if request was successful
+    if response.status_code == 200:
+        # Parse predictions from response
+        predictions = response.json()
 
-# Set app title
-st.title('Animal Classifier')
+        # Return predictions
+        return predictions
 
-# Define a placeholder for the uploaded file data
-image = None
+    # If request failed, raise an exception
+    else:
+        raise Exception('API request failed with status code {}'.format(response.status_code))
 
-# Define a placeholder for the predictions
-predictions = None
+# Define the Streamlit app
+def app():
 
-# Use st.file_uploader to get a file from the user
-st.caption("Choose an image for classification here")
-file = st.file_uploader('Upload image', type=['jpg', 'jpeg', 'png'], label_visibility='visible')
+    # Define session state variables for displaying No button when yes is clicked
+    st.session_state["show_no_button"] = True
 
-# If a file was uploaded
-if file is not None:
+    # Set app title
+    st.title('Animal Classifier')
 
-    # Convert image to bytes
-    image_bytes = file.read()
+    # Define a placeholder for the uploaded file data
+    image = None
 
-    # Display the uploaded image
-    image = Image.open(file)
-    st.image(image, caption='Uploaded Image')
+    # Define a placeholder for the predictions
+    predictions = None
 
+    # Use st.file_uploader to get a file from the user
+    st.caption("Choose an image for classification here")
+    file = st.file_uploader('Upload image', type=['jpg', 'jpeg', 'png'], label_visibility='collapsed')
 
-# If the user has uploaded an image and wants to make predictions
-if image is not None and st.session_state['button'] == True:
-    print("Button1")
-    st.caption("Prediction in progress...")
-    # Use st.spinner to display a spinner while predictions are being made
-    with st.spinner('Predicting...'):
-        # Define the FastAPI endpoint URL
-        api_url = 'http://localhost:8000/predict'
+    # If a file was uploaded
+    if file is not None:
 
-        # Make API request
-        response = requests.post(api_url, files={'file': image_bytes})
+        # Convert image to bytes
+        image_bytes = file.read()
 
-        # Check if request was successful
-        if response.status_code == 200:
-            # Parse predictions from response
-            predictions = response.json()
+        # Display the uploaded image
+        image = Image.open(file)
+        st.image(image, caption='Uploaded Image')
 
-        # If request failed, raise an exception
-        else:
-            raise Exception('API request failed with status code {}'.format(response.status_code))
-    
-    label = predictions["response"]
-    # Display the prediction results
-    st.subheader(f'That animal is a {label}')
+        predict = st.button('Predict Class')
 
-    if st.button('Check 2'):
-            print("Clicked")
-            st.caption("Recommending images...")
-            
+        if st.session_state.get('button') != True:
+            st.session_state['button'] = predict
+
+    # If the user has uploaded an image and wants to make predictions
+    if image is not None and st.session_state['button'] == True:
+
+        st.caption("Prediction in progress...")
+        # Use st.spinner to display a spinner while predictions are being made
+        with st.spinner('Predicting...'):
+            # Make API request to get predictions
+            predictions = get_predictions(image_bytes)
+
+        # Display the prediction results
+        label = predictions["response"]
+        st.subheader(f'That animal is a {label}')
+        st.write(f"Would you like to view similar images of {label}?")
+
+        if st.button('Yes'):
+            st.subheader("Here you go! Enjoy. Click reload to restart.")
+
             # Connect to the SQLite database
             conn = sqlite3.connect("databases/images.db")
-
             cursor = conn.cursor()
-            # Get a list of 5 random images from the database
-            query = f"SELECT file_path FROM metadata WHERE label='{label}' ORDER BY RANDOM() LIMIT 5"
+
+            # Get a list of 6 random images from the database
+            query = f"SELECT file_path FROM metadata WHERE label='{label}' ORDER BY RANDOM() LIMIT 6"
             cursor.execute(query)
             rows = cursor.fetchall()
             images = [row[0] for row in rows]
 
             # Display the images using Streamlit
-            for img_path in images:
-                image = Image.open(img_path)
-                st.image(image, caption=img_path)
+            col1, col2, col3 = st.columns(3)
 
+            for i, img_path in enumerate(images):
+                image = Image.open(img_path)
+                if i % 3 == 0:
+                    col1.image(image)
+                elif i % 3 == 1:
+                    col2.image(image)
+                else:
+                    col3.image(image)
+
+            # Close DB connection
             conn.close()
 
-            st.session_state['button'] = False
+            # Session state reverts to false to indicate restart after checking reload
+            st.session_state["button"] = False
+            st.session_state["show_no_button"] = False
 
-# # If predictions have been made, display a download button for the predictions
-# if predictions is not None:
-#     # Use st.download_button to allow the user to download the predictions as a CSV file
-#     st.download_button(
-#         label='Download predictions',
-#         data=json.dumps(predictions),
-#         file_name='predictions.json',
-#         mime='application/json'
-#     )
+            st.checkbox("Reload")
+                
+        # Session state to control restart after clicking No
+        if st.session_state.get("show_no_button", True):
+            if st.button("No"):
+                # Clear the image and prediction placeholders
+                image = None
+                predictions = None
+
+                # Reset the button state
+                st.session_state['button'] = False
+
+                # Reload the app
+                st.experimental_rerun()
+
+
+# Run the Streamlit app
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--endpoint", help="endpoint for prediction", default='http://localhost:8000/predict')
+    args = parser.parse_args()
+
+    app()
