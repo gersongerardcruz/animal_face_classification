@@ -1,4 +1,4 @@
-# End-to-End Animal Face Classifier using Keras, Keras Tuner Mlflow, SQLite, Streamlit and FastAPI
+# End-to-End Animal Face Classifier using Keras, Keras Tuner, Mlflow, SQLite, Streamlit, and FastAPI
 
 ## Project Information
 
@@ -85,7 +85,7 @@ On a more technical note, a team can generate value from utilizing Keras, Mlflow
 To run the application, first create a virtual environment. I used [miniconda](https://docs.conda.io/en/latest/miniconda.html) as my virtual environment manager and create an environment with the following command: 
 
 ```python
-conda create --name animal_classification python=3.9
+conda create --name animal_classification python=3.10
 conda activate animal_classification
 ```
 
@@ -97,12 +97,16 @@ conda install -c conda-forge openjdk
 
 The next step is to clone the repository in the virtual environment by running:
 
-```python
-HTTPS: git clone https://github.com/gersongerardcruz/animal_face_classification.git
-```
+#### **HTTPS:** 
 
 ```python
-SSH: git clone git@github.com:gersongerardcruz/animal_face_classification.git
+git clone https://github.com/gersongerardcruz/animal_face_classification.git
+```
+
+#### **SSH:**
+
+```python
+git clone git@github.com:gersongerardcruz/animal_face_classification.git
 ```
 
 Then, move into the repository and install the requirements with:
