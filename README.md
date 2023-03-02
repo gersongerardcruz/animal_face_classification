@@ -47,3 +47,65 @@ On a more technical note, the team can generate value from utilizing Keras, Mlfl
 - Reduces the storage requirements and costs for the database by storing the actual images in a less expensive or more scalable storage location, such as a cloud storage bucket or a distributed file system
 - Improves the performance and reliability of the database by reducing the amount of data that needs to be transferred and processed by the database, allowing it to focus on managing the metadata and other aspects of the image data
 - Provides greater flexibility and scalability for managing and storing large volumes of image data, as the storage location can be easily scaled up or down based on demand, and the images can be easily moved or replicated across different storage locations and systems.
+
+## Project Structure
+
+    ├── README.md          <- The top-level documentation for this project.
+    ├── data
+    │   └── raw            <- The original, immutable datasets.
+    ├── databases          <- Contains the relevant SQLite databases
+    ├── images             <- The media used in the README documentation
+    ├── requirements.txt   <- The requirements file for reproducing the project
+    ├── src                <- Folder containing all source code in the project
+    │   ├── backend        <- Folder for all files for setting up the backend 
+    │   ├── frontend       <- Folder for all files for setting up the frontend
+    ├── test_images        <- Images used in demo
+
+## Key Project Files
+
+- `data/`: Folder containing csv files of image metadata
+    - `raw/`: Folder contain image metadata csv files for training and validation sets
+- `databases/`: Folder containing the relevant database constructed in this project: `images.db`
+- `src`: Folder containing source code for both backend and frontend
+    - `backend/`: Folder containing all files for setting up the backend (preprocessing, training, tuning, FastAPI)
+        - `metadata_extraction.py`: Python script which extracts metadata of images in the specified directories and stores them in CSV files.
+        - `populate_table.py`: Python script which populates the specified SQLite table with the metadata information extracted from images
+        - `main.py`: Python script containing FastAPI post request to upload an image, select the best trained model for it, and make predictions
+        - `train.py`: Script for training a baseline Sequential model on the dataset, good for initial testing of model.
+        - `find_best_params.py`: Script for performing hyperparameter tuning on the baseline Sequential model using KerasTuner. 
+    - `frontend/`: Folder containing all files for frontend components (Streamlit UI)
+        - `app.py`: Python file for spinning up the Streamlit application for uploading test images, making predictions, and recommending similar images based on prediction. 
+    
+## Project Instructions
+
+### Setting up
+
+To run the application, first create a virtual environment. I used [miniconda](https://docs.conda.io/en/latest/miniconda.html) as my virtual environment manager and create an environment with the following command: 
+
+```python
+conda create --name animal_classification python=3.9
+conda activate animal_classification
+```
+
+Java is also needed for Mlflow so install Java in your environment by running:
+
+```python
+conda install -c conda-forge openjdk
+```
+
+The next step is to clone the repository in the virtual environment by running:
+
+```python
+HTTPS: git clone https://github.com/gersongerardcruz/animal_face_classification.git
+```
+
+```python
+SSH: git clone git@github.com:gersongerardcruz/animal_face_classification.git
+```
+
+Then, move into the repository and install the requirements with:
+
+```python
+cd animal_face_classification
+pip install -r requirements.txt
+```

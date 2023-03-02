@@ -7,8 +7,6 @@ directories = ["data/raw/train.csv", "data/raw/val.csv"]
 # Initialize empty list to store rows of CSV data
 rows = []
 
-
-
 # Loop through each directory and read the CSV file contents
 id_counter = 0
 for i, directory in enumerate(directories):
