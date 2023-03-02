@@ -4,7 +4,7 @@
 
 This is primarily a project meant for fun and learning because who doesn't love looking at cute animals while learning?
 
-On a more serious note, this project uses a Keras Sequential model, tuned with Keras Tuner, to classify animal faces into three categories: cat, dog, and wildlife. Images were stored locally and their file paths were stored in an SQLite database so that the training and deployment scripts can acess the database to get image file paths and feed them to the model. This is done to simulate cloud environments, where we store the locations of objects in a database like AWS RDS, while storing the actual objects in AWS S3 buckets.
+On a more serious note, this project uses a Keras Sequential model, tuned with Keras Tuner, to classify animal faces into three categories: cat, dog, and wildlife. Training and validation images were downloaded from Kaggle's [Animal Faces Dataset](https://www.kaggle.com/datasets/andrewmvd/animal-faces). Images were stored locally and their file paths were stored in an SQLite database so that the training and deployment scripts can acess the database to get image file paths and feed them to the model. This is done to simulate cloud environments, where we store the locations of objects in a database like AWS RDS, while storing the actual objects in AWS S3 buckets.
 
 To serve the model, the project uses Streamlit for the frontend connected with FastAPI in the backend. An additional feature of the project is to recommend similar images based on the prediction of the model by accessing the SQLite database and displaying images with the same label.
 
@@ -109,3 +109,135 @@ Then, move into the repository and install the requirements with:
 cd animal_face_classification
 pip install -r requirements.txt
 ```
+
+### Preprocessing
+
+To perform metadata extraction, first ensure that the train and val images from [Animal Faces Dataset](https://www.kaggle.com/datasets/andrewmvd/animal-faces) is stored on a separate folder. For this project, the images are stored in a folder named animals_data. Then, run the code: 
+
+```python
+python src/backend/metadata_extraction.py --root_path ../animals_data --directories train val --output_files data/raw/train.csv data/raw/val.csv
+```
+
+where
+
+- `--root_path`: Root path of the train and validation directories
+- `--directories`: Subdirectory names containing the images
+- `--output_files`: Output CSV filenames to store the metadata
+
+This will recursively iterate through animals_data to create `train.csv` and `val.csv` containing relevant image metadata namely `filename, file_path, bytes_size, resolution, aspect_ratio, type, label`. 
+
+Next, we need to store the metadata into a database. To perform that, run the command: 
+
+```python
+python src/backend/populate_table.py
+```
+
+This will create a database named `images.db` containing the `train.csv` and `val.csv` data in the `databases/` directory.
+
+### Training and Tuning
+
+Now that the data has been set up, we can perform model training using the command:
+
+```python
+python src/backend/train.py --experiment_name animal_classification --model_name animal_classifier --epochs 20 --db_path databases/images.db
+```
+
+where 
+
+- `--experiment_name`: name of the experiment to log/create in mlflow
+- `--model_name`: name of the model in mlflow
+- `--epochs`: number of epochs to train
+- `--db_path`: path to database containing file_path and label metadata
+
+This will train a baseline Keras model with the following layers:
+
+```python
+model = Sequential()
+model.add(Conv2D(32, (3, 3), input_shape=(64, 64, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Conv2D(64, (3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Flatten())
+model.add(Dense(128, activation='relu'))
+model.add(Dropout(0.5))
+model.add(Dense(3, activation='softmax'))
+model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics = ['accuracy'])
+```
+
+The model should perform with about `88% accuracy` as shown below:
+
+![baseline](images/baseline_model.jpg)
+
+Should you wish to tune your model, run `find_best_params.py` with:
+
+```python
+python src/backend/find_best_params.py --experiment_name tuned_animal_classification --model_name animal_classifier --epochs 50 --db_path databases/images.db
+```
+
+This will create an Mlflow experiment named `tuned_animal_classification` which should result in about `96% accuracy` as shown below:
+
+![tuned](images/tuned_model.jpg)
+
+Training the baseline model takes about 30 minutes and tuning takes about 3 hours using the 14-inch M1 Macbook Pro GPU. Both training and tuning commands will generate an `mlruns/` folder which contains the experiments, runs, and models created.To check the experiments with mlflow, run the command:
+
+```python
+mlflow ui --port 5001
+```
+
+This will give you a link to your local Mlflow server for tracking experiments and runs. The `--port 5001` is done to ensure that the port will be available because `port 5000` is usually used by local deployments. 
+
+The Mlflow ui and a sample run are shown below.
+
+![mlflow](images/mlflow_ui.jpg)
+![runs](images/mlflow_run.jpg)
+
+### Deployment
+
+To deploy the model and make predictions, open up two terminals. 
+
+In the first terminal, while still being in the `animal_face_classification/` directory, run the command:
+
+```python
+uvicorn src.backend.main:app --reload
+```
+
+This will boot up the FastAPI backend which handles prediction. 
+
+In the second terminal, again while still in the `animal_face_classification/` directory, run the command:
+
+```python
+streamlit run src/frontend/app.py  
+```
+
+This will spin up the Streamlit application which will allow the user to upload an image for prediction. After prediction, the user will be prompted if he/she wants similar images to view. 
+
+### Demo
+
+To see how to interact with the Streamlit UI, watch the gif demonstration below. <br>
+
+![demo](images/demo.gif)
+
+## Conclusion
+
+- Keras provides a user-friendly interface for building and training neural networks, with many built-in layers and utilities, making it an ideal choice for beginners and experts alike. The trained and tuned Keras models were able to classify animal faces into three categories: dog, cat, and wildlife with 88% and 95% accuracy respectively. 
+- Mlflow was used to track and log all the experiment runs, which made it easy to compare and reproduce models across different runs.
+- By using SQLite to store image file paths and another location to store actual images, we can efficiently store large amounts of image data while minimizing storage costs.
+- By using FastAPI and Streamlit, we can quickly build and deploy a web application for our animal face classification model without sacrificing speed, accuracy, or usability.
+
+## Recommendations
+
+- Increase the number of animal classification by collecting more diverse images to increase the generalizability of models. 
+- Use cloud-related services like AWS RDS, ECS, and S3 to make the project more industry-relevant. 
+- Package the model using Docker and deploy it in real-time via the cloud
+
+## References
+
+- https://mlflow.org/docs/latest/index.html
+- https://devdocs.io/fastapi/
+- https://docs.streamlit.io/
+- https://keras.io/keras_tuner/
+- https://keras.io/api/layers/
+- https://www.kaggle.com/datasets/andrewmvd/animal-faces
+
+
+
