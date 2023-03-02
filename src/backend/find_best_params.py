@@ -4,7 +4,7 @@ import mlflow, mlflow.keras
 import sqlite3
 import pandas as pd
 from keras import layers, optimizers, models
-from kerastuner.tuners import RandomSearch
+from keras_tuner.tuners import RandomSearch
 from keras.preprocessing.image import ImageDataGenerator
 from mlflow.tracking import MlflowClient
 
