@@ -2,13 +2,15 @@
 
 ## Project Information
 
-This is primarily a project meant for fun and learning because who doesn't love looking at cute animals while learning?
+This is primarily a project meant for fun and learning because who doesn't love looking at cute animals while doing work?
 
-On a more serious note, this project uses a Keras Sequential model, tuned with Keras Tuner, to classify animal faces into three categories: cat, dog, and wildlife. Training and validation images were downloaded from Kaggle's [Animal Faces Dataset](https://www.kaggle.com/datasets/andrewmvd/animal-faces). Images were stored locally and their file paths were stored in an SQLite database so that the training and deployment scripts can acess the database to get image file paths and feed them to the model. This is done to simulate cloud environments, where we store the locations of objects in a database like AWS RDS, while storing the actual objects in AWS S3 buckets.
+On a more serious note, this project uses a Keras Sequential model, fine-tuned with KerasTuner, to classify animal faces into three categories: **cat, dog, and wildlife**. 
 
-To serve the model, the project uses Streamlit for the frontend connected with FastAPI in the backend. An additional feature of the project is to recommend similar images based on the prediction of the model by accessing the SQLite database and displaying images with the same label.
+Training and validation images were downloaded from Kaggle's [Animal Faces Dataset](https://www.kaggle.com/datasets/andrewmvd/animal-faces).The images were stored locally and their file paths were stored in an SQLite database so that the training and deployment scripts can acess this database to get image file paths and feed them to the model. This is done to **simulate cloud environments, where we store the locations of objects in a database like AWS RDS, while storing the actual objects in AWS S3 buckets**.
 
-While this project is an educational one, I found that there is value to be derived from the use of animal classification models because are important because they have a wide range of applications in various fields such as wildlife conservation, animal behavior analysis, animal ecology, and animal identification.
+To serve the model, the project uses Streamlit for the frontend connected with FastAPI in the backend. Users are able to upload an image and have the model serve its prediction. In addition, the project can also recommend and display similar images based on the prediction of the model by accessing the SQLite database and displaying images with the same label.
+
+While this project is an educational one, I found that there is value to be derived from the use of animal classification models because they have a wide range of applications in various fields such as wildlife conservation, animal behavior analysis, animal ecology, and animal identification.
 
 ## Business Value
 
@@ -21,24 +23,24 @@ To be more specific, here are some applications wherein businesses and organizat
 
 ## Technical Value
 
-On a more technical note, the team can generate value from utilizing Keras, Mlflow, separate locations for image paths and images, SQLite databases, and  in the development of the animal classification model because of the following:
+On a more technical note, a team can generate value from utilizing Keras, Mlflow, separate locations for image paths and images, and SQLite databases in the development of the animal classification model because of the following:
 
 ### Keras:
 
-- User-friendly API: Keras provides a simple and user-friendly API for building neural networks. It allows users to build a neural network model by adding layers to a Sequential model or by defining the model as a graph of layers. This makes it easier for beginners to build their own models without a deep understanding of the underlying mathematical concepts.
+- User-friendly API: Keras provides a simple and user-friendly API for building neural networks. It allows users to build a neural network model by adding layers to a Sequential model or by defining the model as a graph of layers. This makes it easier for beginners to build their own models.
 - Pre-trained models and transfer learning: Keras provides a variety of pre-trained models that can be fine-tuned for specific tasks using transfer learning. This allows users to take advantage of state-of-the-art models that have been trained on large datasets, without having to train them from scratch.
 - Tuning: Keras models have access to KerasTuner which automates the tuning process and saves time and effort that would have been required to manually optimize the model’s performance.
 
 ### Mlflow:
 
-- Makes it easier to reproduce experiments and results by tracking the inputs, parameters, and metrics used in the network intrusion detection model.
+- Makes it easier to reproduce experiments and results by tracking the inputs, parameters, and metrics used in the animal face classification model.
 - Enables effective collaboration and knowledge sharing among data scientists and engineers by providing a centralized repository for model experimentation and results.
 - Provides version control for models and datasets, allowing for easy comparison and selection of the best model for deployment.
-- Facilitates the deployment of the network intrusion detection model by generating deployable artifacts and providing an API for serving the model.
+- Facilitates the deployment of the animal face classification model by generating deployable artifacts and providing an API for serving the model.
 
 ### SQLite for storing images paths:
 
-- Enables efficient querying and retrieval of specific images based on certain criteria (e.g. image label, date added)
+- Enables efficient querying and retrieval of specific images based on certain criteria (e.g. image label, image file path)
 - Allows for easy updating and managing of image metadata, such as image labels, descriptions, and other relevant information
 - Simplifies the process of sharing and distributing image data across multiple systems and applications, as only the file paths need to be shared and not the actual images themselves
 
@@ -227,7 +229,7 @@ To see how to interact with the Streamlit UI, watch the gif demonstration below.
 ## Recommendations
 
 - Increase the number of animal classification by collecting more diverse images to increase the generalizability of models. 
-- Use cloud-related services like AWS RDS, ECS, and S3 to make the project more industry-relevant. 
+- Use cloud-related services like AWS RDS, EC2, and S3 to make the project more industry-relevant. 
 - Package the model using Docker and deploy it in real-time via the cloud
 
 ## References
