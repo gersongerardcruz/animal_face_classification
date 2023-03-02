@@ -63,7 +63,7 @@ def predict_image_class(model, img, threshold=0.6):
         else:
             return "wildlife"
     else:
-        return "I am not certain about that image, can you provide a better one?"
+        return "difficult one to predict, can you provide a better image?"
 
 # Define the predict endpoint
 @app.post("/predict")
